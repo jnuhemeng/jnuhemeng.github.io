@@ -13,7 +13,7 @@ description:      'A brazen two-column <a href="http://jekyllrb.com" target="_bl
 #url:              http://hyde.getpoole.com
 url:              https://jnuhemeng.github.io/
 #baseurl:          /
-baseurl:          jnuhemeng.github.io
+baseurl:          /jnuhemeng.github.io
 
 author:
   name:           'Mark Otto'
