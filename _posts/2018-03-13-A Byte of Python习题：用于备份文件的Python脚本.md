@@ -5,20 +5,23 @@ categories:
   - Python
 tags:
   - Python
+  
 ---
 
-最近在看[《简明 Python 教程(A Byte of Python)》](https://python.swaroopch.com/)，书中有一个小练习，需求为“我想要一款程序来备份我所有的重要文件”。具体要求如下：
-- 需要备份的文件与目录应在一份列表中予以指定；
-- 备份必须存储在一个主备份目录中；
-- 备份文件将打包压缩成 zip 文件；
-- zip 压缩文件的文件名由当前日期与时间构成；
-- 我们使用在任何 GNU/Linux 或 Unix 发行版中都会默认提供的标准 zip 命令进行打包。
-运行效果如下图所示：
+
+最近在看[《简明 Python 教程(A Byte of Python)》](https://python.swaroopch.com/)，书中有一个小练习，需求为“我想要一款程序来备份我所有的重要文件”。具体要求如下：  
+（1）需要备份的文件与目录应在一份列表中予以指定；  
+（2）备份必须存储在一个主备份目录中；  
+（3）备份文件将打包压缩成 zip 文件；  
+（4）zip 压缩文件的文件名由当前日期与时间构成；  
+（5）我们使用在任何 GNU/Linux 或 Unix 发行版中都会默认提供的标准 zip 命令进行打包。  
+需要实现如下图所示的运行效果：
 ![effect](/assets/image/20180313_effect_backup.png)
+
 
 跟着书中的思路，逐步修改完善，得到了如下完整实现：
 
-{% highlight python %}
+```python
 import time  
 import os  
   
@@ -56,11 +59,11 @@ if os.system(zip_command) == 0:
     print('Successful backup to ' + target)  
 else:  
     print('Backup FAILED')  
-{% endhighlight %}
+```
 
 作为课外练习，书中提到可以尝试使用[zipfile模块](https://docs.python.org/3/library/zipfile.html)来替代os.system调用，实现相同的功能。通过查[Python文档](https://docs.python.org/3/library/)和google，写出了如下实现：
 
-{% highlight python %}
+```python
 import time  
 import os  
 import zipfile  
@@ -107,5 +110,4 @@ with zipfile.ZipFile(target, 'x') as myzip:
         print('adding:', filename)  
         myzip.write(filename)  
 print('Successful backup to ' + target)  
-{% endhighlight %}
-
+```
