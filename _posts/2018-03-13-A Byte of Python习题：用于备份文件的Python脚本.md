@@ -14,7 +14,7 @@ tags:
 - zip 压缩文件的文件名由当前日期与时间构成；
 - 我们使用在任何 GNU/Linux 或 Unix 发行版中都会默认提供的标准 zip 命令进行打包。
 运行效果如下图所示：
-
+![effect](/assets/image/20180313_effect_backup.png)
 
 跟着书中的思路，逐步修改完善，得到了如下完整实现：
 
