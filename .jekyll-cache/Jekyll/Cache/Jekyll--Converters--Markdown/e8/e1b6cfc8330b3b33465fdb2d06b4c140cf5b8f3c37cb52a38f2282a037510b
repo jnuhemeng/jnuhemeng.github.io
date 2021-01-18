@@ -1,0 +1,104 @@
+I"B<p><a href="https://leetcode.com/problems/ones-and-zeroes/description/">问题描述</a><br />
+输入一组字符串Array，其中的每个字符串中只可能出现’0’和’1’两种字符；给定两个整数m和n。现在从这组字符串中选取一些字符串，求在保证所选字符串中’0’的个数之和不超过m、’1’的个数之和不超过n的前提下，能够选取到的字符串的最大个数。例如：</p>
+
+<p>Input: Array = {“10”, “0001”, “111001”, “1”, “0”}, m = 5, n = 3<br />
+Output: 4<br />
+Explanation: This are totally 4 strings can be formed by the using of 5 0s and 3 1s, which are “10,”0001”,”1”,”0”.</p>
+
+<p>Input: Array = {“10”, “0”, “1”}, m = 1, n = 1<br />
+Output: 2<br />
+Explanation: You could form “10”, but then you’d have nothing left. Better form “0” and “1”.</p>
+
+<hr />
+
+<h3 id="一brute-force">一、Brute Force</h3>
+<p>找出Array中包含字符串个数分别为1, 2, 3…, Array.length – 1, Array.length的所有可能组合；然后判断各个组合是否满足m和n分别关于’0’和’1’的约束；满足条件的组合中包含最多字符串的组合的长度即为所求。</p>
+
+<h3 id="二回溯算法">二、回溯算法</h3>
+<p>在Brute Force的基础上稍加改进，避免Brute Force中判断是否满足条件时的重复计算问题。例如，在判断组合{A}和{A, another_string}是否满足条件时，Brute Force分别对这两个组合进行判断，从而重复了对{A}的判断；回溯算法则可以利用{A}的处理结果，进一步判断{A, another_string}。代码如下：</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kt">int</span> <span class="nf">findMaxForm</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">strs</span><span class="o">,</span> <span class="kt">int</span> <span class="n">m</span><span class="o">,</span> <span class="kt">int</span> <span class="n">n</span><span class="o">)</span> <span class="o">{</span>  
+    <span class="k">if</span><span class="o">(</span><span class="n">strs</span><span class="o">.</span><span class="na">length</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>  
+        <span class="k">return</span> <span class="mi">0</span><span class="o">;</span>  
+    <span class="o">}</span>  
+      
+    <span class="kt">int</span><span class="o">[][]</span> <span class="n">nums</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">int</span><span class="o">[</span><span class="mi">2</span><span class="o">][</span><span class="n">strs</span><span class="o">.</span><span class="na">length</span><span class="o">];</span>  
+    <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">strs</span><span class="o">.</span><span class="na">length</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>  
+        <span class="k">for</span><span class="o">(</span><span class="kt">char</span> <span class="n">ch</span> <span class="o">:</span> <span class="n">strs</span><span class="o">[</span><span class="n">i</span><span class="o">].</span><span class="na">toCharArray</span><span class="o">())</span> <span class="o">{</span>  
+            <span class="k">if</span><span class="o">(</span><span class="n">ch</span> <span class="o">==</span> <span class="sc">'0'</span><span class="o">)</span> <span class="o">{</span>  
+                <span class="n">nums</span><span class="o">[</span><span class="mi">0</span><span class="o">][</span><span class="n">i</span><span class="o">]++;</span>  
+            <span class="o">}</span>  
+        <span class="o">}</span>  
+        <span class="n">nums</span><span class="o">[</span><span class="mi">1</span><span class="o">][</span><span class="n">i</span><span class="o">]</span> <span class="o">=</span> <span class="n">strs</span><span class="o">[</span><span class="n">i</span><span class="o">].</span><span class="na">length</span><span class="o">()</span> <span class="o">-</span> <span class="n">nums</span><span class="o">[</span><span class="mi">0</span><span class="o">][</span><span class="n">i</span><span class="o">];</span>  
+    <span class="o">}</span>  
+      
+    <span class="kt">int</span><span class="o">[]</span> <span class="n">state</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">int</span><span class="o">[</span><span class="mi">4</span><span class="o">];</span>  
+    <span class="n">findMaxForm</span><span class="o">(</span><span class="n">nums</span><span class="o">,</span> <span class="n">m</span><span class="o">,</span> <span class="n">n</span><span class="o">,</span> <span class="n">state</span><span class="o">,</span> <span class="mi">0</span><span class="o">);</span>  
+      
+    <span class="k">return</span> <span class="n">state</span><span class="o">[</span><span class="mi">3</span><span class="o">];</span>  
+<span class="o">}</span>  
+  
+<span class="kd">private</span> <span class="kt">void</span> <span class="nf">findMaxForm</span><span class="o">(</span><span class="kt">int</span><span class="o">[][]</span> <span class="n">nums</span><span class="o">,</span> <span class="kt">int</span> <span class="n">m</span><span class="o">,</span> <span class="kt">int</span> <span class="n">n</span><span class="o">,</span>   
+    <span class="kt">int</span><span class="o">[]</span> <span class="n">state</span><span class="o">,</span> <span class="kt">int</span> <span class="n">pos</span><span class="o">)</span> <span class="o">{</span>  
+    <span class="k">if</span><span class="o">(</span><span class="n">pos</span> <span class="o">==</span> <span class="n">nums</span><span class="o">[</span><span class="mi">0</span><span class="o">].</span><span class="na">length</span><span class="o">)</span> <span class="o">{</span>  
+        <span class="n">state</span><span class="o">[</span><span class="mi">3</span><span class="o">]</span> <span class="o">=</span> <span class="nc">Math</span><span class="o">.</span><span class="na">max</span><span class="o">(</span><span class="n">state</span><span class="o">[</span><span class="mi">3</span><span class="o">],</span> <span class="n">state</span><span class="o">[</span><span class="mi">2</span><span class="o">]);</span>  
+        <span class="k">return</span><span class="o">;</span>  
+    <span class="o">}</span>  
+      
+    <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">pos</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">nums</span><span class="o">[</span><span class="mi">0</span><span class="o">].</span><span class="na">length</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>  
+        <span class="k">if</span><span class="o">(</span><span class="n">nums</span><span class="o">[</span><span class="mi">0</span><span class="o">][</span><span class="n">i</span><span class="o">]</span> <span class="o">+</span> <span class="n">state</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span> <span class="o">&lt;=</span> <span class="n">m</span> <span class="o">&amp;&amp;</span>  
+            <span class="n">nums</span><span class="o">[</span><span class="mi">1</span><span class="o">][</span><span class="n">i</span><span class="o">]</span> <span class="o">+</span> <span class="n">state</span><span class="o">[</span><span class="mi">1</span><span class="o">]</span> <span class="o">&lt;=</span> <span class="n">n</span><span class="o">)</span> <span class="o">{</span>  
+            <span class="n">state</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span> <span class="o">+=</span> <span class="n">nums</span><span class="o">[</span><span class="mi">0</span><span class="o">][</span><span class="n">i</span><span class="o">];</span>  
+            <span class="n">state</span><span class="o">[</span><span class="mi">1</span><span class="o">]</span> <span class="o">+=</span> <span class="n">nums</span><span class="o">[</span><span class="mi">1</span><span class="o">][</span><span class="n">i</span><span class="o">];</span>  
+            <span class="n">state</span><span class="o">[</span><span class="mi">2</span><span class="o">]++;</span>  
+            <span class="n">findMaxForm</span><span class="o">(</span><span class="n">nums</span><span class="o">,</span> <span class="n">m</span><span class="o">,</span> <span class="n">n</span><span class="o">,</span> <span class="n">state</span><span class="o">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="o">);</span>  
+            <span class="n">state</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span> <span class="o">-=</span> <span class="n">nums</span><span class="o">[</span><span class="mi">0</span><span class="o">][</span><span class="n">i</span><span class="o">];</span>  
+            <span class="n">state</span><span class="o">[</span><span class="mi">1</span><span class="o">]</span> <span class="o">-=</span> <span class="n">nums</span><span class="o">[</span><span class="mi">1</span><span class="o">][</span><span class="n">i</span><span class="o">];</span>  
+            <span class="n">state</span><span class="o">[</span><span class="mi">2</span><span class="o">]--;</span>  
+        <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>  
+            <span class="n">state</span><span class="o">[</span><span class="mi">3</span><span class="o">]</span> <span class="o">=</span> <span class="nc">Math</span><span class="o">.</span><span class="na">max</span><span class="o">(</span><span class="n">state</span><span class="o">[</span><span class="mi">3</span><span class="o">],</span> <span class="n">state</span><span class="o">[</span><span class="mi">2</span><span class="o">]);</span>  
+        <span class="o">}</span>  
+    <span class="o">}</span>  
+<span class="o">}</span>  
+</code></pre></div></div>
+
+<h3 id="三典型的0-1背包问题dp解法">三、典型的0-1背包问题：DP解法</h3>
+<p>上述解法时间复杂度仍然比较大。其实该问题是一个典型的0-1背包问题，DP是该问题的最佳解法。</p>
+
+<p>定义一个m*n的二维整型数组dp，元素(i, j)用于记录在保证所选字符串中’0’的个数之和不超过i、’1’的个数之和不超过j的前提下能够选取到的字符串的最大个数；在遍历输入字符串数组Array过程中，对每个字符串都更新一遍整个dp的状态；最终，dp[m][n]即为题目所求。代码如下：</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kt">int</span> <span class="nf">findMaxForm</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">strs</span><span class="o">,</span> <span class="kt">int</span> <span class="n">m</span><span class="o">,</span> <span class="kt">int</span> <span class="n">n</span><span class="o">)</span> <span class="o">{</span>  
+    <span class="kt">int</span><span class="o">[][]</span> <span class="n">dp</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">int</span><span class="o">[</span><span class="n">m</span> <span class="o">+</span> <span class="mi">1</span><span class="o">][</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="o">];</span>  
+    <span class="k">for</span> <span class="o">(</span><span class="nc">String</span> <span class="n">s</span> <span class="o">:</span> <span class="n">strs</span><span class="o">)</span> <span class="o">{</span>  
+        <span class="kt">int</span><span class="o">[]</span> <span class="n">count</span> <span class="o">=</span> <span class="n">count</span><span class="o">(</span><span class="n">s</span><span class="o">);</span>  
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">m</span><span class="o">;</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="n">count</span><span class="o">[</span><span class="mi">0</span><span class="o">];</span> <span class="n">i</span><span class="o">--)</span>  
+            <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="n">n</span><span class="o">;</span> <span class="n">j</span> <span class="o">&gt;=</span> <span class="n">count</span><span class="o">[</span><span class="mi">1</span><span class="o">];</span> <span class="n">j</span><span class="o">--)</span>  
+                <span class="n">dp</span><span class="o">[</span><span class="n">i</span><span class="o">][</span><span class="n">j</span><span class="o">]</span> <span class="o">=</span> <span class="nc">Math</span><span class="o">.</span><span class="na">max</span><span class="o">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">dp</span><span class="o">[</span><span class="n">i</span> <span class="o">-</span> <span class="n">count</span><span class="o">[</span><span class="mi">0</span><span class="o">]][</span><span class="n">j</span> <span class="o">-</span> <span class="n">count</span><span class="o">[</span><span class="mi">1</span><span class="o">]],</span> <span class="n">dp</span><span class="o">[</span><span class="n">i</span><span class="o">][</span><span class="n">j</span><span class="o">]);</span>  
+    <span class="o">}</span>  
+    <span class="k">return</span> <span class="n">dp</span><span class="o">[</span><span class="n">m</span><span class="o">][</span><span class="n">n</span><span class="o">];</span>  
+<span class="o">}</span>  
+  
+<span class="kd">public</span> <span class="kt">int</span><span class="o">[]</span> <span class="nf">count</span><span class="o">(</span><span class="nc">String</span> <span class="n">str</span><span class="o">)</span> <span class="o">{</span>  
+    <span class="kt">int</span><span class="o">[]</span> <span class="n">res</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">int</span><span class="o">[</span><span class="mi">2</span><span class="o">];</span>  
+    <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">str</span><span class="o">.</span><span class="na">length</span><span class="o">();</span> <span class="n">i</span><span class="o">++)</span>  
+        <span class="n">res</span><span class="o">[</span><span class="n">str</span><span class="o">.</span><span class="na">charAt</span><span class="o">(</span><span class="n">i</span><span class="o">)</span> <span class="o">-</span> <span class="sc">'0'</span><span class="o">]++;</span>  
+    <span class="k">return</span> <span class="n">res</span><span class="o">;</span>  
+<span class="o">}</span>  
+</code></pre></div></div>
+<p>以下为<a href="https://zh.wikipedia.org/zh-hans/%E8%83%8C%E5%8C%85%E9%97%AE%E9%A2%98">维基百科</a>对于背包问题的定义：</p>
+<ul>
+  <li>背包问题： 给定一组物品，每种物品都有自己的重量和价格，在限定的总重量内，我们如何选择，才能使得物品的总价格最高。问题的名称来源于如何选择最合适的物品放置于给定背包中；</li>
+  <li>0-1背包问题： 限定每种物品只能选择0个或1个；</li>
+  <li>有界背包问题： 限定物品j最多只能选择bj个；</li>
+  <li>无界背包问题： 不限定每种物品的数量。
+利用动态规划，背包问题存在一个伪多项式时间算法。各类复杂的背包问题总可以变换为简单的0-1背包问题进行求解。</li>
+</ul>
+
+<hr />
+
+<p><strong>总结</strong>：DP解法的难点之一是构造状态方程，包括以什么作为状态、如何更新状态等问题</p>
+
+<hr />
+
+<p>参考：<br />
+<a href="https://leetcode.com/problems/ones-and-zeroes/discuss/95814/c++-DP-solution-with-comments">c++ DP solution with comments</a><br />
+<a href="https://leetcode.com/problems/ones-and-zeroes/discuss/95807/0-1-knapsack-detailed-explanation.">0-1 knapsack detailed explanation.</a></p>
+:ET

@@ -1,0 +1,144 @@
+I"�f<p>DP（动态规划）本质上是一种利用辅助空间来降低时间复杂度的方法，它利用表来存储中间状态，从而避免子问题的重复计算。DP中辅助空间有两种常见的用法，下面通过一道题来演示。</p>
+
+<p><a href="https://leetcode.com/problems/predict-the-winner/description/">问题描述</a><br />
+给出一个包含非负整数的数组。选手1和选手2轮流从该数组取数，每次取数时只能从数组头部或尾部取数，并且取过的数后面不可以再取。当所有数都被取完时，统计两个选手各自所取数的和，和较大的选手获胜。选手1先取，求选手1能否获胜（当两个选手数的和相等是也算选手1胜）。例如：</p>
+
+<p>Input: [1, 5, 2]<br />
+Output: False<br />
+Explanation: Initially, player 1 can choose between 1 and 2. <br />
+If he chooses 2 (or 1), then player 2 can choose from 1 (or 2) and 5. If player 2 chooses 5, then player 1 will be left with 1 (or 2). <br />
+So, final score of player 1 is 1 + 2 = 3, and player 2 is 5. <br />
+Hence, player 1 will never be the winner and you need to return False.</p>
+
+<p>Input: [1, 5, 233, 7]<br />
+Output: True<br />
+Explanation: Player 1 first chooses 1. Then player 2 have to choose between 5 and 7. No matter which number player 2 choose, player 1 can choose 233.<br />
+Finally, player 1 has more score (234) than player 2 (12), so you need to return True representing player1 can win.</p>
+
+<p>限制：数组长度的范围为[1, 20]，数组元素为非负整数并且不会超过10,000,000。</p>
+
+<hr />
+
+<h3 id="一dp辅助空间用法之递归--缓存">一、DP辅助空间用法之“递归 + 缓存”</h3>
+
+<p>1、题目规定取到的数之和较大者胜，而数组中所有数之和又可以直接求出来。因此，一个直接的想法是先求出选手1能够获得的最大和，再判断是否大于或等于数组中所有数之和（由题目限制可知不会出现溢出问题）的一半。代码如下：</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">PredictWinner</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="kt">int</span><span class="o">[]</span> <span class="n">sums</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">,</span> <span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">map</span><span class="o">;</span>
+      
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">PredictTheWinner</span><span class="o">(</span><span class="kt">int</span><span class="o">[]</span> <span class="n">nums</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">sums</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">int</span><span class="o">[</span><span class="n">nums</span><span class="o">.</span><span class="na">length</span><span class="o">];</span>  
+        <span class="n">map</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HashMap</span><span class="o">&lt;&gt;();</span>  
+          
+        <span class="n">sums</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span> <span class="o">=</span> <span class="n">nums</span><span class="o">[</span><span class="mi">0</span><span class="o">];</span>  
+        <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">nums</span><span class="o">.</span><span class="na">length</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>  
+            <span class="n">sums</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">=</span> <span class="n">sums</span><span class="o">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="o">]</span> <span class="o">+</span> <span class="n">nums</span><span class="o">[</span><span class="n">i</span><span class="o">];</span>  
+        <span class="o">}</span>  
+          
+        <span class="kt">int</span> <span class="n">part1</span> <span class="o">=</span> <span class="nc">PredictTheWinner</span><span class="o">(</span><span class="n">nums</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="n">nums</span><span class="o">.</span><span class="na">length</span> <span class="o">-</span> <span class="mi">1</span><span class="o">),</span>  
+            <span class="n">part2</span> <span class="o">=</span> <span class="nc">PredictTheWinner</span><span class="o">(</span><span class="n">nums</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">nums</span><span class="o">.</span><span class="na">length</span> <span class="o">-</span> <span class="mi">2</span><span class="o">);</span>  
+          
+        <span class="k">return</span> <span class="n">part1</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">&lt;=</span> <span class="n">sums</span><span class="o">[</span><span class="n">sums</span><span class="o">.</span><span class="na">length</span> <span class="o">-</span> <span class="mi">1</span><span class="o">]</span> <span class="o">||</span>  
+            <span class="n">part2</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">&lt;=</span> <span class="n">sums</span><span class="o">[</span><span class="n">sums</span><span class="o">.</span><span class="na">length</span> <span class="o">-</span> <span class="mi">1</span><span class="o">];</span>  
+    <span class="o">}</span>
+      
+    <span class="kd">private</span> <span class="kt">int</span> <span class="nf">PredictTheWinner</span><span class="o">(</span><span class="kt">int</span><span class="o">[]</span> <span class="n">nums</span><span class="o">,</span> <span class="kt">int</span> <span class="n">left</span><span class="o">,</span> <span class="kt">int</span> <span class="n">right</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kt">int</span> <span class="n">key</span> <span class="o">=</span> <span class="n">getKey</span><span class="o">(</span><span class="n">left</span><span class="o">,</span> <span class="n">right</span><span class="o">);</span>  
+        <span class="k">if</span><span class="o">(</span><span class="n">left</span> <span class="o">==</span> <span class="n">right</span><span class="o">)</span> <span class="o">{</span>  
+            <span class="n">map</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">key</span><span class="o">,</span> <span class="n">nums</span><span class="o">[</span><span class="n">left</span><span class="o">]);</span>  
+        <span class="o">}</span> <span class="k">else</span> <span class="k">if</span><span class="o">(</span><span class="n">left</span> <span class="o">&gt;</span> <span class="n">right</span><span class="o">)</span> <span class="o">{</span>  
+            <span class="k">return</span> <span class="mi">0</span><span class="o">;</span>  
+        <span class="o">}</span>  
+        <span class="k">if</span><span class="o">(</span><span class="n">map</span><span class="o">.</span><span class="na">containsKey</span><span class="o">(</span><span class="n">key</span><span class="o">))</span> <span class="o">{</span>  
+            <span class="k">return</span> <span class="n">map</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">key</span><span class="o">);</span>  
+        <span class="o">}</span>  
+          
+        <span class="kt">int</span> <span class="n">part1</span> <span class="o">=</span> <span class="nc">PredictTheWinner</span><span class="o">(</span><span class="n">nums</span><span class="o">,</span> <span class="n">left</span> <span class="o">+</span> <span class="mi">1</span><span class="o">,</span> <span class="n">right</span><span class="o">),</span>  
+            <span class="n">part2</span> <span class="o">=</span> <span class="nc">PredictTheWinner</span><span class="o">(</span><span class="n">nums</span><span class="o">,</span> <span class="n">left</span><span class="o">,</span> <span class="n">right</span> <span class="o">-</span> <span class="mi">1</span><span class="o">);</span>  
+        <span class="n">part1</span> <span class="o">=</span> <span class="n">sums</span><span class="o">[</span><span class="n">right</span><span class="o">]</span> <span class="o">-</span> <span class="n">sums</span><span class="o">[</span><span class="n">left</span> <span class="o">+</span> <span class="mi">1</span><span class="o">]</span> <span class="o">+</span> <span class="n">nums</span><span class="o">[</span><span class="n">left</span> <span class="o">+</span> <span class="mi">1</span><span class="o">]</span> <span class="o">-</span> <span class="n">part1</span> <span class="o">+</span> <span class="n">nums</span><span class="o">[</span><span class="n">left</span><span class="o">];</span>  
+        <span class="n">part2</span> <span class="o">=</span> <span class="n">sums</span><span class="o">[</span><span class="n">right</span> <span class="o">-</span> <span class="mi">1</span><span class="o">]</span> <span class="o">-</span> <span class="n">sums</span><span class="o">[</span><span class="n">left</span><span class="o">]</span> <span class="o">+</span> <span class="n">nums</span><span class="o">[</span><span class="n">left</span><span class="o">]</span> <span class="o">-</span> <span class="n">part2</span> <span class="o">+</span> <span class="n">nums</span><span class="o">[</span><span class="n">right</span><span class="o">];</span>  
+          
+        <span class="k">return</span> <span class="nc">Math</span><span class="o">.</span><span class="na">max</span><span class="o">(</span><span class="n">part1</span><span class="o">,</span> <span class="n">part2</span><span class="o">);</span>  
+    <span class="o">}</span>
+      
+    <span class="kd">private</span> <span class="kt">int</span> <span class="nf">getKey</span><span class="o">(</span><span class="kt">int</span> <span class="n">left</span><span class="o">,</span> <span class="kt">int</span> <span class="n">right</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kt">int</span> <span class="n">key</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>  
+        <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">left</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">right</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>  
+            <span class="n">key</span> <span class="o">&lt;&lt;=</span> <span class="mi">1</span><span class="o">;</span>  
+            <span class="n">key</span> <span class="o">|=</span> <span class="mh">0x1</span><span class="o">;</span>  
+        <span class="o">}</span>  
+        <span class="n">key</span> <span class="o">&lt;&lt;=</span> <span class="n">left</span><span class="o">;</span>  
+          
+        <span class="k">return</span> <span class="n">key</span><span class="o">;</span>  
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+<p>其中，递归函数private int PredictTheWinner(int[] nums, int left, int right)表示，从nums的[left, right]范围内取数时，先取的选手能够选取到的最大和。为了避免子问题的重复计算，例如“选手1取左选手2取右”与“选手1取右选手2取左”后得到的子问题是重复的问题，直接使用一个Map来缓存子问题的解。<br />
+空间复杂度为O(n)，时间复杂度为O(n^2)，其中n为数组的长度。</p>
+
+<p>2、上述解法求出了两个选手最终取到的数之和，所以需要先用一个数组来存放输入数组的累积和。实际上，这对于解决题目中的问题并非必需的。其实，只要求出选手1的和与选手2的和之差、再判断差值是否大于或等于0即可。这可以通过改变递归函数的含义来实现，代码如下：</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">PredictWinner</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">PredictTheWinner</span><span class="o">(</span><span class="kt">int</span><span class="o">[]</span> <span class="n">nums</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="nf">helper</span><span class="o">(</span><span class="n">nums</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">nums</span><span class="o">.</span><span class="na">length</span><span class="o">-</span><span class="mi">1</span><span class="o">,</span> <span class="k">new</span> <span class="nc">Integer</span><span class="o">[</span><span class="n">nums</span><span class="o">.</span><span class="na">length</span><span class="o">][</span><span class="n">nums</span><span class="o">.</span><span class="na">length</span><span class="o">])&gt;=</span><span class="mi">0</span><span class="o">;</span>  
+    <span class="o">}</span>
+    <span class="kd">private</span> <span class="kt">int</span> <span class="nf">helper</span><span class="o">(</span><span class="kt">int</span><span class="o">[]</span> <span class="n">nums</span><span class="o">,</span> <span class="kt">int</span> <span class="n">s</span><span class="o">,</span> <span class="kt">int</span> <span class="n">e</span><span class="o">,</span> <span class="nc">Integer</span><span class="o">[][]</span> <span class="n">mem</span><span class="o">){</span>
+        <span class="k">if</span><span class="o">(</span><span class="n">mem</span><span class="o">[</span><span class="n">s</span><span class="o">][</span><span class="n">e</span><span class="o">]==</span><span class="kc">null</span><span class="o">)</span>  
+            <span class="n">mem</span><span class="o">[</span><span class="n">s</span><span class="o">][</span><span class="n">e</span><span class="o">]</span> <span class="o">=</span> <span class="n">s</span><span class="o">==</span><span class="n">e</span> <span class="o">?</span> <span class="n">nums</span><span class="o">[</span><span class="n">e</span><span class="o">]</span> <span class="o">:</span> <span class="nc">Math</span><span class="o">.</span><span class="na">max</span><span class="o">(</span><span class="n">nums</span><span class="o">[</span><span class="n">e</span><span class="o">]-</span><span class="n">helper</span><span class="o">(</span><span class="n">nums</span><span class="o">,</span><span class="n">s</span><span class="o">,</span><span class="n">e</span><span class="o">-</span><span class="mi">1</span><span class="o">,</span><span class="n">mem</span><span class="o">),</span><span class="n">nums</span><span class="o">[</span><span class="n">s</span><span class="o">]-</span><span class="n">helper</span><span class="o">(</span><span class="n">nums</span><span class="o">,</span><span class="n">s</span><span class="o">+</span><span class="mi">1</span><span class="o">,</span><span class="n">e</span><span class="o">,</span><span class="n">mem</span><span class="o">));</span>  
+        <span class="k">return</span> <span class="n">mem</span><span class="o">[</span><span class="n">s</span><span class="o">][</span><span class="n">e</span><span class="o">];</span>  
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+<p>其中，递归函数private int helper(int[] nums, int s, int e, Integer[][] mem)表示， 从nums的[left, right]范围内取数时，先取的选手比后取的选手所取到的数之和大多少。同样，利用缓存来避免子问题的重复计算，但是这里以二维数组作为缓存。<br />
+空间复杂度为O(n^2)，时间复杂度为O(n^2)。虽然这里的时间复杂度与1中解法的一样，但是由于低阶项比1中的小，因此实际运行时会更快一些。</p>
+
+<h3 id="二dp辅助空间用法之迭代--表">二、DP辅助空间用法之“迭代 + 表”</h3>
+
+<p>用一个二维数组dp来存储中间状态，dp[i][j]表示从nums 的[i, j]范围内取数时， 先取的选手比后取的选手所取到的数之和大多少。状态的更新规则为dp[i][j] = Math.max(nums[i] - dp[i + 1][j], nums[j] - dp[i][j – 1])。最后，判断dp[0][nums.length - 1]是否大于或等于0即可。代码如下：</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">PredictWinner</span> <span class="o">{</span>
+  
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">PredictTheWinner</span><span class="o">(</span><span class="kt">int</span><span class="o">[]</span> <span class="n">nums</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kt">int</span> <span class="n">n</span> <span class="o">=</span> <span class="n">nums</span><span class="o">.</span><span class="na">length</span><span class="o">;</span>  
+        <span class="kt">int</span><span class="o">[][]</span> <span class="n">dp</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">int</span><span class="o">[</span><span class="n">n</span><span class="o">][</span><span class="n">n</span><span class="o">];</span>  
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span> <span class="n">dp</span><span class="o">[</span><span class="n">i</span><span class="o">][</span><span class="n">i</span><span class="o">]</span> <span class="o">=</span> <span class="n">nums</span><span class="o">[</span><span class="n">i</span><span class="o">];</span> <span class="o">}</span>  
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">len</span> <span class="o">=</span> <span class="mi">1</span><span class="o">;</span> <span class="n">len</span> <span class="o">&lt;</span> <span class="n">n</span><span class="o">;</span> <span class="n">len</span><span class="o">++)</span> <span class="o">{</span>  
+            <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">n</span> <span class="o">-</span> <span class="n">len</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>  
+                <span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="n">len</span><span class="o">;</span>  
+                <span class="n">dp</span><span class="o">[</span><span class="n">i</span><span class="o">][</span><span class="n">j</span><span class="o">]</span> <span class="o">=</span> <span class="nc">Math</span><span class="o">.</span><span class="na">max</span><span class="o">(</span><span class="n">nums</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">-</span> <span class="n">dp</span><span class="o">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="o">][</span><span class="n">j</span><span class="o">],</span> <span class="n">nums</span><span class="o">[</span><span class="n">j</span><span class="o">]</span> <span class="o">-</span> <span class="n">dp</span><span class="o">[</span><span class="n">i</span><span class="o">][</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="o">]);</span>  
+            <span class="o">}</span>  
+        <span class="o">}</span>  
+        <span class="k">return</span> <span class="n">dp</span><span class="o">[</span><span class="mi">0</span><span class="o">][</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="o">]</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="o">;</span>  
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+<p>对空间开销进行优化——由O(n^2)降低至O(n)，而时间复杂度仍然保持为O(n^2)。代码如下：</p>
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">PredictWinner</span> <span class="o">{</span>
+  
+    <span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">PredictTheWinner</span><span class="o">(</span><span class="kt">int</span><span class="o">[]</span> <span class="n">nums</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">nums</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span> <span class="k">return</span> <span class="kc">true</span><span class="o">;</span> <span class="o">}</span>  
+        <span class="kt">int</span> <span class="n">n</span> <span class="o">=</span> <span class="n">nums</span><span class="o">.</span><span class="na">length</span><span class="o">;</span>  
+        <span class="k">if</span> <span class="o">((</span><span class="n">n</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="o">)</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span> <span class="k">return</span> <span class="kc">true</span><span class="o">;</span> <span class="o">}</span>   
+        <span class="kt">int</span><span class="o">[]</span> <span class="n">dp</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">int</span><span class="o">[</span><span class="n">n</span><span class="o">];</span>  
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="o">;</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span><span class="o">--)</span> <span class="o">{</span>  
+            <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="n">i</span><span class="o">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">n</span><span class="o">;</span> <span class="n">j</span><span class="o">++)</span> <span class="o">{</span>  
+                <span class="k">if</span> <span class="o">(</span><span class="n">i</span> <span class="o">==</span> <span class="n">j</span><span class="o">)</span> <span class="o">{</span>  
+                    <span class="n">dp</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">=</span> <span class="n">nums</span><span class="o">[</span><span class="n">i</span><span class="o">];</span>  
+                <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>  
+                    <span class="n">dp</span><span class="o">[</span><span class="n">j</span><span class="o">]</span> <span class="o">=</span> <span class="nc">Math</span><span class="o">.</span><span class="na">max</span><span class="o">(</span><span class="n">nums</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">-</span> <span class="n">dp</span><span class="o">[</span><span class="n">j</span><span class="o">],</span> <span class="n">nums</span><span class="o">[</span><span class="n">j</span><span class="o">]</span> <span class="o">-</span> <span class="n">dp</span><span class="o">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="o">]);</span>  
+                <span class="o">}</span>  
+            <span class="o">}</span>  
+        <span class="o">}</span>  
+        <span class="k">return</span> <span class="n">dp</span><span class="o">[</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="o">]</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="o">;</span>  
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<hr />
+
+<p><strong>总结</strong>：上述题目的两种解法分别演示了DP解法对辅助空间的两种常见用法。递归的解法比较直观，往往是读完题目后首先想到的思路，而对于其中的子问题重复计算问题，用Map或者二维数组作为缓存来解决；“迭代 + 表”的解法则需要根据问题确定以什么作为状态，并分析状态的更新规则。</p>
+
+<hr />
+
+<p>参考：<br />
+<a href="https://leetcode.com/problems/predict-the-winner/discuss/96828/JAVA-9-lines-DP-solution-easy-to-understand-with-improvement-to-O(N)-space-complexity">JAVA 9 lines DP solution, easy to understand with improvement to O(N) space complexity</a><br />
+<a href="https://leetcode.com/problems/predict-the-winner/discuss/96838/Java-1-Line-Recursion-Solution">Java 1 Line Recursion Solution</a></p>
+:ET

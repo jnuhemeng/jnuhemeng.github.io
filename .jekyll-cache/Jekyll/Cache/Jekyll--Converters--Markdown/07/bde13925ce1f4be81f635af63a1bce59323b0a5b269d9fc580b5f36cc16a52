@@ -1,0 +1,44 @@
+I"o<p>辗转相除法（即欧几里德算法）是一种求最大公约数的算法。两个不全为0的非负整数的最大公约数记为gcd(m, n)（这里假定m不小于n），并且g(m, 0)=m。该算法的步骤为：<br />
+第一步：如果n=0,返回m的值作为结果，同时过程结束；否则，进入第二步；<br />
+第二步：m除以n，将余数赋给r；<br />
+第三步：将n的值赋给m，将r的值赋给n，返回第一步。</p>
+
+<p>C语言实现代码如下：</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include &lt;stdio.h&gt;
+</span>
+<span class="kt">int</span> <span class="nf">gcd</span><span class="p">(</span><span class="kt">int</span> <span class="n">m</span><span class="p">,</span> <span class="kt">int</span> <span class="n">n</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="k">while</span><span class="p">(</span><span class="n">n</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+		<span class="kt">int</span> <span class="n">r</span> <span class="o">=</span> <span class="n">m</span> <span class="o">%</span> <span class="n">n</span><span class="p">;</span>
+		<span class="n">m</span> <span class="o">=</span> <span class="n">n</span><span class="p">;</span>
+		<span class="n">n</span> <span class="o">=</span> <span class="n">r</span><span class="p">;</span>
+	<span class="p">}</span>
+
+	<span class="k">return</span> <span class="n">m</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+	<span class="kt">int</span> <span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">;</span>
+	<span class="k">while</span><span class="p">(</span><span class="n">scanf</span><span class="p">(</span><span class="s">"%d %d"</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">m</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">n</span><span class="p">)</span> <span class="o">!=</span> <span class="n">EOF</span><span class="p">)</span>
+		<span class="n">printf</span><span class="p">(</span><span class="s">"gcd(%d, %d)=%d</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">gcd</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">));</span>
+
+	<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>每经过一次循环，n的值都会变小并且绝不会变成负数。因此n最终会变成0，从而使算法能够在有限的循环次数内结束。</p>
+
+<p>为什么辗转相除法是正确的？换句话说，如何证明gcd(m, n) = gcd(n, m mod n)？<br />
+证明：<br />
+    如果a能被b整除，则记“a | b”。又记：(p为整数)<br />
+        m = pn + (m mod n) —– (1)<br />
+        (m mod n) = m - pn —– (2)  <br />
+    令gcd(m, n) = g1, gcd(n, m mod n) = g2。则有<br />
+        m | g1, n | g1<br />
+        n | g2, (m mod n) | g2<br />
+    可见，(1)式等号右边的每一项都能够被g2整除，因此(1)式等号左边的部分也能被g2整除，即m | g2。再结合n | g2可知，g2是n和m的公约数，故g2 &lt;= g1。  <br />
+    同理可由(2)式得知g1是n和(m mod n)的公约数，故g1 &lt;= g2。<br />
+    所以，g1 = g2，即gcd(m, n) = gcd(n, m mod n)。</p>
+
+:ET
