@@ -5,11 +5,6 @@
        href="{{ site.github.repo }}">
       {% include svg/github.svg %}
     </a>
-    <a id="github-download-link"
-       class="icon" title="Download" aria-label="Download"
-       href="{{ site.github.repo }}/archive/v{{ site.version }}.zip">
-      {% include svg/download.svg %}
-    </a>
   {% endif %}
 
   <a id="subscribe-link"
@@ -44,7 +39,7 @@
     <a id="search-link"
        class="icon{% if page.url == '/search' %} active{% endif %}"
        title="Search" aria-label="Search"
-       href="{{ site.baseurl }}{{ search_page.url }}">
+       href="{{ site.baseurl }}">
       {% include svg/search.svg %}
     </a>
   {% endif %}
