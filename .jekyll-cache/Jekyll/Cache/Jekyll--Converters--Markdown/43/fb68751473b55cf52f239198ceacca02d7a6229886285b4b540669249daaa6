@@ -1,0 +1,108 @@
+I"�<h3 id="hyperloglog简介">HyperLogLog简介</h3>
+<p><a href="https://redis.io/topics/data-types-intro">Redis HyperLogLog</a>(以下简称HLL)实现了一种叫做“HyperLogLog”的算法，并以Redis数据结构的形式提供给开发者使用。HLL只做一件事情，即统计集合中不重复元素的个数（术语叫做集合基数）。<br />
+集合基数的统计用Redis中的set数据结构和Java中的Set集合类都可以实现，但是由于它们都会实际存储集合元素——存储空间正比于集合基数，因此它们不适合集合基数比较大的场景。HLL使用“精度换空间”的权衡策略，实现了以12kB的常量存储空间开销，得到标准误（standard error）为0.81%的集合基数估计值，并且集合基数的上限可以达到2^64。HLL不存储集合元素，只存储一个反映已添加集合元素的状态，因此能够实现常量空间复杂度。<br />
+Redis HLL在实现上没有引入新的数据结构，而是复用了string数据结构，即HLL底层是用string编码的。</p>
+
+<h4 id="使用场景举例">使用场景举例</h4>
+<p>服务每天被多少个不重复的IP访问过？<br />
+接口每月被多少个不重复的用户ID访问过？<br />
+搜索每天接收到了多少个不重复的搜索词请求？</p>
+
+<h3 id="hyperloglog命令">HyperLogLog命令</h3>
+<p>HLL的API非常简单，包括3条命令：</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>command</th>
+      <th>作用</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>PFADD</td>
+      <td>往HLL“添加”元素</td>
+    </tr>
+    <tr>
+      <td>PFCOUNT</td>
+      <td>读取HLL当前集合基数</td>
+    </tr>
+    <tr>
+      <td>PFMERGE</td>
+      <td>合并两个或多个HLL</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4 id="pfadd-往hll添加元素"><a href="https://redis.io/commands/pfadd">PFADD</a>: 往HLL“添加”元素</h4>
+<p>PFADD key [element [element …]]</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>redis&gt;  PFADD hll a b c d e f g
+<span class="o">(</span>integer<span class="o">)</span> 1
+redis&gt;  PFCOUNT hll
+<span class="o">(</span>integer<span class="o">)</span> 7
+</code></pre></div></div>
+<p><strong>返回值</strong><br />
+Integer reply, specifically:<br />
+　　1 if at least 1 HyperLogLog internal register was altered. 0 otherwise.<br />
+<strong>时间复杂度</strong><br />
+　　O(1)时间复杂度<br />
+PFADD命令执行时，如果key还不存在就会先创建一个空的HLL；然后把key后面的元素（如有）“添加”到HLL。HLL实际上不会存储PFADD命令“添加”进来的元素，而是对元素进行计算看是否需要更新内部寄存器状态（如果需要则更新寄存器并返回1，否则返回0）。</p>
+
+<h4 id="pfcount-读取hll当前集合基数"><a href="https://redis.io/commands/pfcount">PFCOUNT</a>: 读取HLL当前集合基数</h4>
+<p>PFCOUNT key [key …]</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>redis&gt;  PFADD hll foo bar zap
+<span class="o">(</span>integer<span class="o">)</span> 1
+redis&gt;  PFADD hll zap zap zap
+<span class="o">(</span>integer<span class="o">)</span> 0
+redis&gt;  PFADD hll foo bar
+<span class="o">(</span>integer<span class="o">)</span> 0
+redis&gt;  PFCOUNT hll
+<span class="o">(</span>integer<span class="o">)</span> 3
+redis&gt;  PFADD some-other-hll 1 2 3
+<span class="o">(</span>integer<span class="o">)</span> 1
+redis&gt;  PFCOUNT hll some-other-hll
+<span class="o">(</span>integer<span class="o">)</span> 6
+</code></pre></div></div>
+<p><strong>返回值</strong><br />
+Integer reply, specifically:<br />
+　　The approximated number of unique elements observed via PFADD.<br />
+<strong>时间复杂度</strong><br />
+　　只传一个key时O(1)时间复杂度（内部可缓存，快），传N个key时O(N)时间复杂度（无法缓存，毫秒级级）。<br />
+当只传1个key时，如果集合基数的缓存值有效就直接返回缓存的集合基数，否则计算集合基数并返回；当传多个key时，Redis内部先把这些key对应HLL合并成得到1个临时HLL，然后计算并返回这个HLL的集合基数。</p>
+
+<h4 id="pfmerge-合并两个或多个hll"><a href="https://redis.io/commands/pfmerge">PFMERGE</a>: 合并两个或多个HLL</h4>
+<p>PFMERGE destkey sourcekey [sourcekey …]</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>redis&gt;  PFADD hll1 foo bar zap a
+<span class="o">(</span>integer<span class="o">)</span> 1
+redis&gt;  PFADD hll2 a b c foo
+<span class="o">(</span>integer<span class="o">)</span> 1
+redis&gt;  PFMERGE hll3 hll1 hll2
+<span class="s2">"OK"</span>
+redis&gt;  PFCOUNT hll3
+<span class="o">(</span>integer<span class="o">)</span> 6
+</code></pre></div></div>
+<p><strong>返回值</strong><br />
+Simple string reply: The command just returns OK.<br />
+<strong>时间复杂度</strong><br />
+　　合并N个HLL时O(N)时间复杂度<br />
+把1个destkey和多个sourcekey合并成1个HLL并写到destkey中，命令执行完成时destkey的集合基数等于这些集合的并集的集合基数值。</p>
+
+<p>HLL内部用Redis string编码，因此支持GET和SET命令。在对HLL执行这2个命令时，Redis会进行相应的序列化和反序列化操作。</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>redis&gt; PFADD hll a b c d e f g
+<span class="o">(</span>integer<span class="o">)</span> 1
+redis&gt; get hll
+<span class="s2">"HYLL</span><span class="se">\x</span><span class="s2">01</span><span class="se">\x</span><span class="s2">00</span><span class="se">\x</span><span class="s2">00</span><span class="se">\x</span><span class="s2">00</span><span class="se">\x</span><span class="s2">00</span><span class="se">\x</span><span class="s2">00</span><span class="se">\x</span><span class="s2">00</span><span class="se">\x</span><span class="s2">00</span><span class="se">\x</span><span class="s2">00</span><span class="se">\x</span><span class="s2">00</span><span class="se">\x</span><span class="s2">00</span><span class="se">\x</span><span class="s2">80Fm</span><span class="se">\x</span><span class="s2">80V</span><span class="se">\x</span><span class="s2">0c</span><span class="se">\x</span><span class="s2">80@</span><span class="se">\x</span><span class="s2">e9</span><span class="se">\x</span><span class="s2">80CQ</span><span class="se">\x</span><span class="s2">848</span><span class="se">\x</span><span class="s2">80P</span><span class="se">\x</span><span class="s2">b1</span><span class="se">\x</span><span class="s2">84I</span><span class="se">\x</span><span class="s2">8c</span><span class="se">\x</span><span class="s2">80Bm</span><span class="se">\x</span><span class="s2">80BZ"</span>
+redis&gt; 
+</code></pre></div></div>
+
+<h3 id="hyperloglog原理">HyperLogLog原理</h3>
+<p>Redis HLL的理论来源是如下2篇文献：<br />
+P. Flajolet, Éric Fusy, O. Gandouet, and F. Meunier. <a href="http://algo.inria.fr/flajolet/Publications/FlFuGaMe07.pdf">Hyperloglog: The  analysis of a near-optimal cardinality estimation algorithm</a>.<br />
+Heule, Nunkesser, Hall: <a href="http://citeseerx.ist.psu.edu/viewdoc/download;jsessionid=30F1D3FD363452B76390182D2F5E58F0?doi=10.1.1.308.9527&amp;rep=rep1&amp;type=pdf">HyperLogLog in Practice: Algorithmic  Engineering of a State of The Art Cardinality Estimation Algorithm</a>.</p>
+
+<hr />
+
+<p>参考：<br />
+《Linux Shell脚本攻略》</p>
+
+:ET
