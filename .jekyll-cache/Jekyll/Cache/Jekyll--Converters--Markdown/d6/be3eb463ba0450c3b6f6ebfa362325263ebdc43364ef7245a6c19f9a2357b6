@@ -1,9 +1,0 @@
-I"�<p>最近在看<a href="https://python.swaroopch.com/">《简明 Python 教程(A Byte of Python)》</a>，书中有一个小练习，需求为“我想要一款程序来备份我所有的重要文件”。具体要求如下：<br />
-（1）需要备份的文件与目录应在一份列表中予以指定；<br />
-（2）备份必须存储在一个主备份目录中；<br />
-（3）备份文件将打包压缩成 zip 文件；<br />
-（4）zip 压缩文件的文件名由当前日期与时间构成；<br />
-（5）我们使用在任何 GNU/Linux 或 Unix 发行版中都会默认提供的标准 zip 命令进行打包。<br />
-需要实现如下图所示的运行效果：
-<img src="/assets/image/20180313_effect_backup.png" alt="effect" /></p>
-:ET

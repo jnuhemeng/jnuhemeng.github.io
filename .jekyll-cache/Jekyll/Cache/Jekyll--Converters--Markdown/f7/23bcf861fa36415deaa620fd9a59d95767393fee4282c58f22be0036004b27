@@ -1,5 +1,0 @@
-I"<h3 id="hyperloglog简介">HyperLogLog简介</h3>
-<p><a href="https://redis.io/topics/data-types-intro">Redis HyperLogLog</a>(以下简称HLL)实现了一种叫做“HyperLogLog”的算法，并以Redis数据结构的形式提供给开发者使用。HLL只做一件事情，即统计集合中不重复元素的个数（术语叫做集合基数）。<br />
-集合基数的统计用Redis中的set数据结构和Java中的Set集合类都可以实现，但是由于它们都会实际存储集合元素——存储空间正比于集合基数，因此它们不适合集合基数比较大的场景。HLL使用“精度换空间”的权衡策略，实现了以12kB的常量存储空间开销，得到标准误（standard error）为0.81%的集合基数估计值，并且集合基数的上限可以达到2^64。HyperLogLog不存储集合元素，只存储一个反映已添加集合元素的状态。<br />
-Redis HLL在实现上没有引入新的数据结构，而是复用了string数据结构，即HLL底层是用string编码的。</p>
-:ET

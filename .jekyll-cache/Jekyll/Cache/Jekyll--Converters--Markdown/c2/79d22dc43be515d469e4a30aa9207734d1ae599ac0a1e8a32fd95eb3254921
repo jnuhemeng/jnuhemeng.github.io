@@ -1,9 +1,0 @@
-I"<p><a href="https://leetcode.com/problems/predict-the-winner/description/">问题描述</a><br />
-输入一个二维字符类型数组，其元素取值只可能为’0’或’1’。求该数组中由’1’构成的最大正方形的面积（即包含的元素个数）。例如，如果输入如下二维数组：</p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	1 0 1 0 0  
-	1 0 1 1 1  
-	1 1 1 1 1  
-	1 0 0 1 0  
-</code></pre></div></div>
-<p>那么，就输出4。</p>
-:ET

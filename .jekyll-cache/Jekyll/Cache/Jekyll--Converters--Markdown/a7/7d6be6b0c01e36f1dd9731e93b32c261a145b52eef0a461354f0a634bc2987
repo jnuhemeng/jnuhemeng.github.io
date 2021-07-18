@@ -1,4 +1,0 @@
-I"�<p><a href="https://curl.haxx.se/">curl</a>是一种用来测试应用协议的命令行工具，支持包括HTTP、FTP、SMTP和TELNET等在内的多种协议，并且提供了代理、认证和cookies等丰富的特性。
-<img src="/assets/image/20180316curl.png" alt="curl" />
-curl的功能非常强大，这里简单记录一下自己在后台开发时涉及的用法（HTTP协议）。</p>
-:ET
