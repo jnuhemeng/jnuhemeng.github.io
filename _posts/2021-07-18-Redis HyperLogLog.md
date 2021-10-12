@@ -203,10 +203,10 @@ XZERO:15362 (Registers 1022-16383 set to 0)
 
 
 参考：  
-An introduction to Redis data types and abstractions: https://redis.io/topics/data-types-intro  
-HyperLogLog: https://en.wikipedia.org/wiki/HyperLogLog  
-Redis HLL实现细节: http://antirez.com/news/75  
-Redis HLL源码: https://github.com/redis/redis/blob/unstable/src/hyperloglog.c  
-HLL算法原理直观演示: http://content.research.neustar.biz/blog/hll.html  
+[An introduction to Redis data types and abstractions](https://redis.io/topics/data-types-intro)   
+[维基百科词条：HyperLogLog](https://en.wikipedia.org/wiki/HyperLogLog)   
+[Redis HLL实现细节](http://antirez.com/news/75)   
+[Redis HLL源码](https://github.com/redis/redis/blob/unstable/src/hyperloglog.c)   
+[HLL算法原理直观演示](http://content.research.neustar.biz/blog/hll.html)   
 
 
